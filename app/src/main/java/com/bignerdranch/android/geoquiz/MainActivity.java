@@ -3,6 +3,7 @@ package com.bignerdranch.android.geoquiz;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -10,6 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "QuizActivity";
 
     //    the m prefix is an Android naming convention for member variables
     private Button mTrueButton;
@@ -27,10 +30,12 @@ public class MainActivity extends AppCompatActivity {
     };
     private int mCurrentIndex = 0;
 
+//    begin lifecycle methods
     //    The onCreate(Bundle) method is called when an instance of the activity subclass is created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate(Bundle) called");
 //        When an activity is created, it needs a UI to manage. To get the activity its UI, you
 //        call the following Activity method
         setContentView(R.layout.activity_main);
@@ -87,6 +92,35 @@ public class MainActivity extends AppCompatActivity {
 
         updateQuestion();
     }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        Log.d(TAG, "onStart() called");
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d(TAG, "onResume() called");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause() called");
+    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop() called");
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy() called");
+    }
+//    end lifecycle methods
 
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
