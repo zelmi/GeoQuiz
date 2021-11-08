@@ -8,10 +8,22 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+//shake events
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
     //    the m prefix is an Android naming convention for member variables
+    private SensorManager mSensorManager;
+    private float mAccel;
+    private float mAccelCurrent;
+    private float mAccelLast;
+//    variables for shake end
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mNextButton;
@@ -86,7 +98,35 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateQuestion();
+
+//        shake
+
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Objects.requireNonNull(mSensorManager).registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        mAccel = 10f;
+        mAccelCurrent = SensorManager.GRAVITY_EARTH;
+        mAccelLast = SensorManager.GRAVITY_EARTH;
     }
+
+    private final SensorEventListener mSensorListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+            mAccelLast = mAccelCurrent;
+            mAccelCurrent = (float) Math.sqrt((double) (x * x + y * y + z * z));
+            float delta = mAccelCurrent - mAccelLast;
+            mAccel = mAccel * 0.9f + delta;
+            if (mAccel > 12) {
+                Toast.makeText(getApplicationContext(), "Shake event detected", Toast.LENGTH_SHORT).show();
+            }
+        }
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    };
 
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
@@ -103,5 +143,16 @@ public class MainActivity extends AppCompatActivity {
         }
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT)
                 .show();
+    }
+    @Override
+    protected void onResume() {
+        mSensorManager.registerListener(mSensorListener, mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_NORMAL);
+        super.onResume();
+    }
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(mSensorListener);
+        super.onPause();
     }
 }
